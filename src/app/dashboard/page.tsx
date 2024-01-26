@@ -1,31 +1,27 @@
-import Image from "next/image";
-import styles from "../page.module.css";
+import prisma from "../../../lib/prisma";
 
-export default function Home() {
+export default async function Posts({
+  params
+} : {
+  params: { user: string }
+}): Promise<JSX.Element> {
+  const feed = await prisma.post.findMany({
+    where: { published: true },
+    include: {
+      author: {
+        select: { name: true },
+      },
+    },
+  });
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          foo bar
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <div>
+      {feed.map((row) => (
+        <div key={row.id}>
+          {row.id} - {row.title}
         </div>
-      </div>
-    </main>
+      ))}
+    </div>
   );
 }
+
